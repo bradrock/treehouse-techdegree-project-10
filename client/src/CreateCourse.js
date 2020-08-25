@@ -1,3 +1,4 @@
+//renders "create course" page
 import React, {Fragment} from 'react';
 
 export default class CourseUpdate extends React.PureComponent {
@@ -7,11 +8,15 @@ export default class CourseUpdate extends React.PureComponent {
   constructor(props){
     super(props);
     this.state = {
-      course: {title: ''},
+      course: {
+        title: '',
+        description: '',
+        materialsNeeded: '',
+        estimatedTime: ''
+      },
       loaded: false,
       validationErrorDisplay: "none",
-      errors: "",
-      errorListElements: null
+      validationErrorListElements: null
     };
 
   }
@@ -24,7 +29,8 @@ export default class CourseUpdate extends React.PureComponent {
   }
 
 
-updateClickHandler = (e) => {
+//handle "create coures" button click--send new course POST request
+submitClickHandler = (e) => {
   e.preventDefault();
 
     const { context } = this.props;
@@ -61,8 +67,8 @@ updateClickHandler = (e) => {
           responseStatus = response.status;
           if(responseStatus === 201)
           {
-        
-              window.location.replace("/");
+            this.props.history.push("/");
+              
           }
           else{
             
@@ -75,16 +81,16 @@ updateClickHandler = (e) => {
         if (responseStatus === 400)
         {
           let errors = result.errors;
-           this.setState({errorListElements: errors.map((error, index) => <li key={index}>{error}</li>)});
-            this.setState({validationErrorDisplay: "block"});
+          this.setState({validationErrorListElements: errors.map((error, index) => <li key={index}>{error}</li>)});
+          this.setState({validationErrorDisplay: "block"});
         }
         
       })
      
       .catch(error => 
-            {
-                console.log('error', error)
-            });
+        {
+          console.log('error', error);
+        });
 
 }
 
@@ -98,7 +104,7 @@ const value = e.target.value;
       ...prevState.course,    
       estimatedTime: value    
   }
-}))
+}));
   
 }
 
@@ -112,7 +118,7 @@ handleChangeTitle = (e) => {
        ...prevState.course,    
        title: value      
    }
- }))
+ }));
 
 }
 
@@ -125,7 +131,7 @@ handleChangeDescription = (e) => {
        ...prevState.course,    
        description: value      
    }
- }))
+ }));
  
 }
 
@@ -139,7 +145,7 @@ handleChangeMaterialsNeeded = (e) => {
        ...prevState.course,    
        materialsNeeded: value      
    }
- }))
+ }));
  
 }
 
@@ -160,7 +166,7 @@ componentWillUnmount(){
                 <h2 className="validation--errors--label" style={{display: this.state.validationErrorDisplay}}>Validation errors</h2>
                 <div className="validation-errors">
                   <ul>
-                    {this.state.errorListElements}
+                    {this.state.validationErrorListElements}
                   </ul>
                 </div>
               </div>
@@ -172,7 +178,7 @@ componentWillUnmount(){
                     <p>By Joe Smith</p>
                   </div>
                   <div className="course--description">
-                    <div><textarea id="description" name="description" className="" placeholder="Course description..." onChange={e => this.handleChangeDescription(e)}>{this.state.course.description}</textarea></div>
+                    <div><textarea id="description" name="description" className="" placeholder="Course description..." value={this.state.course.description} onChange={e => this.handleChangeDescription(e)}></textarea></div>
                   </div>
                 </div>
                 <div className="grid-25 grid-right">
@@ -184,12 +190,12 @@ componentWillUnmount(){
                       </li>
                       <li className="course--stats--list--item">
                         <h4>Materials Needed</h4>
-                        <div><textarea id="materialsNeeded" name="materialsNeeded" className="" placeholder="List materials..." onChange={e => this.handleChangeMaterialsNeeded(e)}>{this.state.course.materialsNeeded}</textarea></div>
+                        <div><textarea id="materialsNeeded" name="materialsNeeded" className="" placeholder="List materials..." value={this.state.course.materialsNeeded} onChange={e => this.handleChangeMaterialsNeeded(e)}></textarea></div>
                       </li>
                     </ul>
                   </div>
                 </div>
-                <div className="grid-100 pad-bottom"><button className="button" type="submit" onClick={e => this.updateClickHandler(e)}>Create Course</button><a className="button button-secondary" href='/'>Cancel</a></div>
+                <div className="grid-100 pad-bottom"><button className="button" type="submit" onClick={e => this.submitClickHandler(e)}>Create Course</button><a className="button button-secondary" href='/'>Cancel</a></div>
               </form>
             </div>
           </div>

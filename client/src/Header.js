@@ -1,4 +1,5 @@
 //adapted from Treehouse Techdegree Unit 10 React Authentication example project
+//renders header displayed for all pages
 import React from 'react';
 import {NavLink} from 'react-router-dom';
 
@@ -12,7 +13,7 @@ return (
     <div className="bounds">
       <h1 className="header--logo">Courses</h1>
       <nav>
-        {authUser ? (
+        {authUser ? ( //if there is an authorized user signed in, then display their name and a logout link, if not, display "sign in" and "sign up" links
         <React.Fragment>
           <span>Welcome, {authUser.firstName + " " + authUser.lastName}!</span><NavLink className="/signout" to="/signout">Sign Out</NavLink>
           </React.Fragment> ):

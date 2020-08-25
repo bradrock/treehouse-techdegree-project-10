@@ -1,4 +1,5 @@
 //adapted from Treehouse Techdegree Unit 10 React Authentication example project
+//renders user sign-in page
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Form from './Form';
@@ -52,6 +53,7 @@ export default class UserSignIn extends Component {
     );
   }
 
+  //handle changes in form fields
   change = (event) => {
     const name = event.target.name;
     const value = event.target.value;
@@ -63,6 +65,7 @@ export default class UserSignIn extends Component {
     });
   }
 
+  //handle form submission to sign user in
   submit = () => {
     const { context } = this.props;
     const { from } = this.props.location.state || { from: { pathname: '/' } };
@@ -84,6 +87,7 @@ export default class UserSignIn extends Component {
       });
   }
 
+  //handle event that user clicks cancel button
   cancel = () => {
     this.props.history.push('/');
   }

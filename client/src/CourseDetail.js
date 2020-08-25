@@ -1,3 +1,4 @@
+//renders a detail page with info for a single course
 import React, {Fragment} from 'react';
 import { Redirect } from 'react-router-dom';
 const ReactMarkdown = require('react-markdown');
@@ -24,13 +25,15 @@ export default class CourseDetail extends React.PureComponent {
         loaded: false,
         updateCourseElement: null,
         deleteCourseElement: null,
-        error: false
+        badCourseGetRequest: false,
+        getRequestResponseStatus: null,
+        badDeleteRequest: false,
         
       };
 
     }
 
-  
+    //completes GET request for course info upon component mounting
     componentDidMount(){
 
 
@@ -41,6 +44,10 @@ export default class CourseDetail extends React.PureComponent {
 
       fetch('http://localhost:5000/api/courses/' + this.props.courseId)
       .then(response => {
+        
+        this.setState({getRequestResponseStatus: response.status});
+
+        
         if (response.ok){
           return response.json();
         }
@@ -79,7 +86,7 @@ export default class CourseDetail extends React.PureComponent {
           if (authUser && authUser.id === this.state.course.userId)
           {
             this.setState({updateCourseElement: <a className="button" href={"/courses/" + this.props.courseId + "/update"}>Update Course</a>});
-            this.setState({deleteCourseElement: <a className="button" href="/#" onClick={() => this.clickHandler()}>Delete Course</a>});
+            this.setState({deleteCourseElement: <a className="button" href="/#" onClick={(e) => this.clickHandler(e)}>Delete Course</a>});
           }
           
         }
@@ -87,7 +94,7 @@ export default class CourseDetail extends React.PureComponent {
       })
       .catch(error => {
    
-        this.setState({error: true});
+        this.setState({badCourseGetRequest: true});
 
         this.setState({loaded: true});
         
@@ -97,13 +104,60 @@ export default class CourseDetail extends React.PureComponent {
     
   }
 
-  clickHandler = () => {
 
-      fetch('http://localhost:5000/api/courses/' + this.state.course.id, {method: 'DELETE'})
-      .then((response) => {window.location.replace("/")})
-      .catch(error => {
-        console.log('Error deleting: ', error);
+  //handles "delete course" button click, sends DELETE request
+  clickHandler = (e) => {
+
+    e.preventDefault();
+
+
+    const { context } = this.props;
+    const authUser = context.authenticatedUser;
+    const password = authUser.password;
+
+    let username = authUser.emailAddress;
+
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append('Authorization', 'Basic ' + Buffer.from(username + ":" + password).toString('base64'));
+    
+    var requestOptions = {
+      method: 'DELETE',
+      headers: myHeaders,
+      redirect: 'error'
+    };  
+    
+    let responseStatus = null;
+    
+    fetch('http://localhost:5000/api/courses/' + this.props.courseId, requestOptions)
+    .then(response => {
+      responseStatus = response.status;
+      if(responseStatus === 204)
+      {
+          window.location.replace("/");
+      }
+      else{
         
+        return response.json();
+      }
+      
+  })
+      .then(result => {
+          
+        if (responseStatus === 400)
+        {
+          let errors = result.errors;
+          console.log(errors);
+          this.setState({badDeleteRequest: true});
+        }
+       
+      })
+   
+      .catch(error => {
+
+        this.setState({badDeleteRequest: true});
+      
+        console.log('error', error)
       });
   }
 
@@ -121,13 +175,38 @@ export default class CourseDetail extends React.PureComponent {
     else
     {
 
-      if(this.state.error)
+      //if the response to the GET request was not "OK"...
+      if(this.state.badCourseGetRequest)
+      {
+        //...if the response gave a code for "not found", redirect to "notfound" page
+        if(this.state.getRequestResponseStatus >= 400 && this.state.getRequestResponseStatus < 500)
+        {
+          return (<Redirect to={{
+            pathname: '/notfound'
+            
+          }} />);
+        }
+        //...if the response gave any other error code, then redirect to "error" page
+        else
+        {
+          return (<Redirect to={{
+            pathname: '/error'
+            
+          }} />);
+        }
+        
+        
+      }
+
+      //if the response for the DELETE request is not OK, redirect to "error" page
+      else if(this.state.badDeleteRequest)
       {
         return (<Redirect to={{
           pathname: '/error'
           
         }} />);
       }
+
       else
       {
 

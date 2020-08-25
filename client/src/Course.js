@@ -1,3 +1,4 @@
+//renders a "tile" object for a single course on the main "Courses" page
 import React from 'react';
 
 

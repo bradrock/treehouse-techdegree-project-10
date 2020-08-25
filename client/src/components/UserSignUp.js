@@ -1,4 +1,5 @@
 //adapted from Treehouse Techdegree Unit 10 React Authentication example project
+//renders user signup page
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Form from './Form';
@@ -9,6 +10,7 @@ export default class UserSignUp extends Component {
     lastName: '',
     emailAddress: '',
     password: '',
+    confirmPassword: '',
     errors: [],
   }
 
@@ -18,6 +20,7 @@ export default class UserSignUp extends Component {
       lastName,
       emailAddress,
       password,
+      confirmPassword,
       errors,
     } = this.state;
 
@@ -64,7 +67,7 @@ export default class UserSignUp extends Component {
                   id="confirmPassword" 
                   name="confirmPassword"
                   type="password"
-                  value={password} 
+                  value={confirmPassword} 
                   onChange={this.change} 
                   placeholder="Confirm Password" />
               </React.Fragment>
@@ -77,6 +80,7 @@ export default class UserSignUp extends Component {
     );
   }
 
+  //handles change in signup form
   change = (event) => {
     const name = event.target.name;
     const value = event.target.value;
@@ -88,6 +92,7 @@ export default class UserSignUp extends Component {
     });
   }
 
+  //handles form submission--posts new user and signs new user in
   submit = () => {
     
     const {
@@ -95,49 +100,86 @@ export default class UserSignUp extends Component {
       lastName,
       emailAddress,
       password,
+      confirmPassword
     } = this.state;
 
+    
 
-    var myHeaders = new Headers();
-myHeaders.append("Content-Type", "application/json");
-
-var raw = JSON.stringify({"firstName":firstName,"lastName":lastName,"emailAddress":emailAddress,"password":password});
-
-var requestOptions = {
-  method: 'POST',
-  headers: myHeaders,
-  body: raw,
-  redirect: 'follow'
-};
-
-let responseStatus;
-
-fetch("http://localhost:5000/api/users", requestOptions)
-  .then(response => {
-    responseStatus = response.status;
-    if(responseStatus === 201)
+    if(password !== confirmPassword)
     {
-        window.location.replace("/");
+      this.setState({errors: ["Passwords do not match."]});
     }
-    else{
-      
-      return response.json();
+
+    else
+    {
+
+
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      var raw = JSON.stringify({"firstName":firstName,"lastName":lastName,"emailAddress":emailAddress,"password":password});
+
+      var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+      };
+
+      let responseStatus;
+
+
+      fetch("http://localhost:5000/api/users", requestOptions)
+          .then(response => {
+            responseStatus = response.status;
+            if(responseStatus === 201)
+            {
+            return true;
+            }
+            else{
+              
+              return response.json();
+            }
+            
+        })
+        .then(result => {
+            
+          if (responseStatus === 400)
+          {
+            let errors = result.errors;
+            this.setState({errors: errors});
+            
+          }
+          else if (responseStatus === 201)
+          {
+            const { context } = this.props;
+            
+
+            context.actions.signIn(emailAddress, password)
+              .then((user) => {
+                if (user === null) {
+                  this.setState(() => {
+                    return { errors: [ 'Sign-in was unsuccessful' ] };
+                  });
+                } else {
+                  this.props.history.push("/");
+                }
+              })
+              .catch((error) => {
+                console.error(error);
+                this.props.history.push('/error');
+              });
+          }
+        
+          })
+          .catch(error => console.log('error', error));
+
     }
-    
-})
-.then(result => {
-    
-  if (responseStatus === 400)
-  {
-    let errors = result.errors;
-    this.setState({errors: errors});
-  }
- 
-})
-  .catch(error => console.log('error', error));
 
   }
 
+
+  //handles user clicking cancel button in form--returns user to main page
   cancel = () => {
    this.props.history.push('/');
   }

@@ -1,4 +1,5 @@
 //from Treehouse Techdegree Unit 10 React Authentication example project
+//contains methods for getting and creating users
 import config from './config';
 
 export default class Data {

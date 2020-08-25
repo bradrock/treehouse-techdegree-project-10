@@ -1,3 +1,4 @@
+//Renders general error message
 import React from 'react';
 
 

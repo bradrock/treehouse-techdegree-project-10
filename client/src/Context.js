@@ -1,4 +1,5 @@
 //adapted from Treehouse Techdegree Unit 10 React Authentication example project
+//manages global state for user credentials
 import React, { Component } from 'react';
 import Cookies from 'js-cookie';
 import Data from './Data';
@@ -34,7 +35,7 @@ export class Provider extends Component {
     );
   }
 
-  
+  //signs user in
   signIn = async (emailAddress, password) => {
     const user = await this.data.getUser(emailAddress, password);
     this.setState(() => {
@@ -59,13 +60,11 @@ export class Provider extends Component {
       };
       Cookies.set('authenticatedUser', JSON.stringify(user), cookieOptions);
     }
-    else
-    {
-      
-    }
+    
     return user;
   }
 
+  //signs user out
   signOut = () => {
     this.setState({ authenticatedUser: null });
     Cookies.remove('authenticatedUser');

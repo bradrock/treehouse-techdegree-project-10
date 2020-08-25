@@ -1,3 +1,4 @@
+//renders "update course" page
 import React, {Fragment} from 'react';
 import { Redirect } from 'react-router-dom';
 
@@ -16,18 +17,21 @@ export default class UpdateCourse extends React.PureComponent {
         materialsNeeded: null
       },
       
+      forbidden: false,
+
       loaded: false,
       validationErrorDisplay: "none",
       
-      errorListElements: null,
-      error: false,
-      forbidden: false
+      validationErrorListElements: null,
+      badGetCourseRequest: false,
+      getRequestResponseStatus: null,
+      putRequestServerError: false
     };
 
   }
 
   
-
+  //perform GET request for course info when component is mounted
   componentDidMount(){
 
     this._isMounted = true;
@@ -39,6 +43,9 @@ export default class UpdateCourse extends React.PureComponent {
 
     fetch('http://localhost:5000/api/courses/' + this.props.courseId)
     .then(response => {
+      
+      this.setState({getRequestResponseStatus: response.status});
+      
       if (response.ok){
         return response.json();
       }
@@ -50,28 +57,27 @@ export default class UpdateCourse extends React.PureComponent {
     })
     .then(responseData => {
 
-      if (this._isMounted){
-
         this.setState({course: responseData});
 
+        //set "forbidden" to true if the user (instructor) listed for the course is not the same as the user signed in--users are not allowed to edit
+        //courses for which they are not listed as the instructor
         if (authUser && this.state.course.userId && authUser.id !== this.state.course.userId)
           {
             this.setState({forbidden: true});
           }
 
-
         this.setState({loaded: true});
-      }
+      
     })
     .catch(error => {
-      this.setState({error: true});
+      this.setState({badGetCourseRequest: true});
       this.setState({loaded: true});
     });
 
     
 }
 
-
+//handles "update course" button click--sends PUT request
 updateClickHandler = (e) => {
   e.preventDefault();
 
@@ -107,10 +113,10 @@ updateClickHandler = (e) => {
     fetch("http://localhost:5000/api/courses/" + this.state.course.id, requestOptions)
     .then(response => {
       responseStatus = response.status;
+      //if response is good, redirect user to course detail page
       if(responseStatus === 204)
       {
-          
-          window.location.replace("/courses/" + this.state.course.id);
+        this.props.history.push("/courses/" + this.state.course.id); 
       }
       else{
         
@@ -122,17 +128,19 @@ updateClickHandler = (e) => {
           
         if (responseStatus === 400)
         {
-        console.log("Response status is: " + responseStatus);
-          console.log(result);
+        
           let errors = result.errors;
-          console.log(errors);
-           this.setState({errorListElements: errors.map((error, index) => <li key={index}>{error}</li>)});
+           this.setState({validationErrorListElements: errors.map((error, index) => <li key={index}>{error}</li>)});
             this.setState({validationErrorDisplay: "block"});
         }
        
       })
    
-      .catch(error => console.log('error', error));
+      .catch(error => {
+        console.log('error', error);
+        this.setState({putRequestServerError: true});
+
+      });
 
       
 
@@ -148,7 +156,7 @@ const value = e.target.value;
       ...prevState.course,    
       estimatedTime: value      
   }
-}))
+}));
   
 }
 
@@ -161,7 +169,7 @@ handleChangeTitle = (e) => {
        ...prevState.course,    
        title: value      
    }
- }))
+ }));
 
 }
 
@@ -174,7 +182,7 @@ handleChangeDescription = (e) => {
        ...prevState.course,    
        description: value      
    }
- }))
+ }));
 
 }
 
@@ -187,7 +195,7 @@ handleChangeMaterialsNeeded = (e) => {
        ...prevState.course,    
        materialsNeeded: value      
    }
- }))
+ }));
  
 }
 
@@ -199,30 +207,51 @@ componentWillUnmount(){
   
   render(){
 
+    //prevents page from displaying until GET request for course is complete and form components are completely loaded
     if (!this.state.loaded)
     {
       return(null);
     }
 
     else{
-
-      if(this.state.error)
+      //if the response for the GET request is not "OK"...
+      if(this.state.badGetCourseRequest)
+      {
+        //if there is a response code representing that the course could not be found, redirect to "not found" page
+        if(this.state.getRequestResponseStatus >= 400 && this.state.getRequestResponseStatus < 500)
+        {
+          return (<Redirect to={{
+            pathname: '/notfound'
+            
+          }} />);
+        }
+        //otherwise, redirect to general error page
+        else
+        {
+          return (<Redirect to={{
+            pathname: '/error'
+            
+          }} />);
+        }
+        
+        
+      }
+      //if "forbidden" is set to "true" because course's user does not match logged-in user, redirect to "forbidden" page
+      else if(this.state.forbidden)
+      {
+        return (<Redirect to={{
+          pathname: '/forbidden'
+          
+        }} />);
+      }
+      //if response for PUT request is not "OK", redirect to error page
+      else if(this.state.putRequestServerError)
       {
         return (<Redirect to={{
           pathname: '/error'
           
         }} />);
       }
-      else
-      {
-
-        if(this.state.forbidden)
-        {
-          return (<Redirect to={{
-            pathname: '/forbidden'
-            
-          }} />);
-        }
         else
         {
 
@@ -236,7 +265,7 @@ componentWillUnmount(){
                       <h2 className="validation--errors--label" style={{display: this.state.validationErrorDisplay}}>Validation errors</h2>
                         <div className="validation-errors">
                           <ul>
-                            {this.state.errorListElements}
+                            {this.state.validationErrorListElements}
                           </ul>
                         </div>
                       </div>
@@ -271,7 +300,7 @@ componentWillUnmount(){
                 </div>
               </Fragment>
             );
-        }
+        
       }
     
     }

@@ -1,4 +1,5 @@
 //from Treehouse Techdegree Unit 10 React Authentication example project
+//form component used for UserSignIn and UserSignUp
 import React from 'react';
 
 export default (props) => {

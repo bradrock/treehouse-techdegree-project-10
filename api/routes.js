@@ -205,7 +205,6 @@ router.get('/courses/:id', asyncHandler(async (req, res) => {
       courseUserString = courseUser.firstName + " " + courseUser.lastName;
     }
 
-    //delete courseJSON.userId;
 
     courseJSON.user = courseUserString;
 
@@ -312,7 +311,7 @@ router.put('/courses/:id', authenticateUser, [
 
 
 //Deletes a course and returns no content
-router.delete('/courses/:id',/* authenticateUser,*/ asyncHandler(async(req, res) => {
+router.delete('/courses/:id', authenticateUser, asyncHandler(async(req, res) => {
 
   // Attempt to get the validation result from the Request object.
   const errors = validationResult(req);

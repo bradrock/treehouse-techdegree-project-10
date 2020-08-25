@@ -9,11 +9,13 @@ export default class Courses extends React.PureComponent {
       this.state = {
         courses: [],
         error: false,
-        isLoading: true
+        isLoading: true, //use this to prevent page from rendering until all courses are loaded
+        coursesElements: []
       }
      
     }
   
+    //send GET request for all courses and generate course component "tiles"
     componentDidMount(){
       fetch('http://localhost:5000/api/courses')
       .then(response => {
@@ -28,14 +30,23 @@ export default class Courses extends React.PureComponent {
       })
       .then(responseData => {
         this.setState({courses: responseData});
-  
+
+        if (this.state.courses.length)
+        {
+          this.setState({coursesElements: this.state.courses.map(course =>  <Course id={course.id} title={course.title} key={course.id}/>)});
+        }
+
+        this.setState({isLoading: false});
       })
       .catch(error => {
         this.setState({error: true});
         console.log(this.state.error);
+        this.setState({isLoading: false});
       });
 
-      this.setState({isLoading: false});
+      
+
+      
     
   }
   
@@ -51,6 +62,7 @@ export default class Courses extends React.PureComponent {
     else
     {
       
+      //don't render page if courses are not finished loading
       if(this.state.isLoading)
       {
         return(null);
@@ -58,18 +70,12 @@ export default class Courses extends React.PureComponent {
       
       else
       {
-        let courses = null;
-    
-        if (this.state.courses.length)
-        {
-          courses = this.state.courses.map(course =>  <Course id={course.id} title={course.title} key={course.id}/>);
-        }
     
         return (
           <Fragment>
           <hr></hr>
             <div className="bounds">
-                {courses}
+                {this.state.coursesElements}
                 <div className="grid-33"><a className="course--module course--add--module" href="/courses/create">
                     <h3 className="course--add--title"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
                         viewBox="0 0 13 13" className="add">

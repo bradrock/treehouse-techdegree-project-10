@@ -1,3 +1,4 @@
+//Renders an "access forbidden" message
 import React from 'react';
 
 export default () => (
