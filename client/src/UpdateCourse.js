@@ -116,7 +116,9 @@ updateClickHandler = (e) => {
       //if response is good, redirect user to course detail page
       if(responseStatus === 204)
       {
-        this.props.history.push("/courses/" + this.state.course.id); 
+        this.props.history.push("/courses/" + this.state.course.id);
+        
+        
       }
       else{
         
@@ -133,6 +135,10 @@ updateClickHandler = (e) => {
            this.setState({validationErrorListElements: errors.map((error, index) => <li key={index}>{error}</li>)});
             this.setState({validationErrorDisplay: "block"});
         }
+        else if (responseStatus === 500)
+        {
+          this.setState({putRequestServerError: true});
+        }
        
       })
    
@@ -146,6 +152,8 @@ updateClickHandler = (e) => {
 
 
 }
+
+
 
 
 handleChangeEstimatedTime = (e) => {
@@ -202,7 +210,7 @@ handleChangeMaterialsNeeded = (e) => {
 
 componentWillUnmount(){
   this._isMounted = false;
-
+  
 }
   
   render(){

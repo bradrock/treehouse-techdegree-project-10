@@ -150,6 +150,10 @@ export default class CourseDetail extends React.PureComponent {
           console.log(errors);
           this.setState({badDeleteRequest: true});
         }
+        else if (responseStatus === 500)
+        {
+          this.setState({badDeleteRequest: true});
+        }
        
       })
    

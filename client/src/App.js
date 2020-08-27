@@ -61,6 +61,7 @@ export default class App extends React.PureComponent {
                 <Route path="/signout" component={UserSignOutWithContext} />
                 <Route path="/error" component={UnhandledError} />
                 <Route path="/forbidden" component={Forbidden} />
+                <Route path="/notfound" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>
             </ErrorBoundary>

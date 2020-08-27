@@ -89,8 +89,10 @@ router.get('/users', authenticateUser, (req, res) => {
     firstName: user.firstName,
     lastName: user.lastName,
     emailAddress: user.emailAddress,
-    //password: user.password
   });
+
+  
+
 });
 
 // Route that creates a new user.
@@ -154,6 +156,8 @@ router.post('/users', [
 
     // Set the status to 201 Created and end the response.
     res.status(201).end();
+
+    
     
   }
 }));
@@ -171,7 +175,7 @@ router.get('/courses', asyncHandler(async (req, res) => {
   
   res.json(courses);
 
-
+  
 
 }));
 
@@ -211,6 +215,8 @@ router.get('/courses/:id', asyncHandler(async (req, res) => {
     res.json(courseJSON);
 
     
+
+    
   }
 }));
 
@@ -247,6 +253,8 @@ router.post('/courses', authenticateUser, [
 
     // Set the status to 201 Created and end the response.
     res.status(201).end();
+
+    
     
     
   }
@@ -304,6 +312,10 @@ router.put('/courses/:id', authenticateUser, [
 
     // Set the status to 201 Created and end the response.
     res.status(204).end();
+
+    
+    
+
   }
 
   
@@ -348,6 +360,8 @@ router.delete('/courses/:id', authenticateUser, asyncHandler(async(req, res) => 
 
     // Set the status to 201 Created and end the response.
     res.status(204).end();
+
+    
   }
 }));
 
